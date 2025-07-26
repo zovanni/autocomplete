@@ -154,7 +154,52 @@ export default function App() {
                                     "bg-brand-primary-200"
                             )}
                         >
-                            {result.title}
+                            {(() => {
+                                const splitKeepSeparator = (
+                                    str: string,
+                                    separator: string
+                                ) => {
+                                    const escaped = separator.replace(
+                                        /[.*+?^${}()|[\]\\]/g,
+                                        "\\$&"
+                                    ); // escape regex chars
+                                    const regex = new RegExp(
+                                        `(${escaped})`,
+                                        "gi"
+                                    );
+                                    return str.split(regex);
+                                };
+
+                                const input = result.title;
+                                let res = splitKeepSeparator(
+                                    input,
+                                    search as string
+                                );
+
+                                if (res.length > 1) {
+                                    res = res.filter((element, index) => {
+                                        // Remove the first element if it's an empty string
+                                        return !(element === "" && index === 0);
+                                    });
+                                }
+
+                                return res.map((element, index) => {
+                                    return (
+                                        <span
+                                            className={cn(
+                                                "highlight",
+                                                element.toLowerCase() ===
+                                                    (
+                                                        search as string
+                                                    ).toLowerCase() &&
+                                                    "bg-brand-primary-500"
+                                            )}
+                                        >
+                                            {element}
+                                        </span>
+                                    );
+                                });
+                            })()}
                         </div>
                     ))}
                 </div>
