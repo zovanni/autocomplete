@@ -31,6 +31,7 @@ export interface Player {
     pageid: number;
     ns: number;
     title: string;
+    type: 'page' | 'subcat';
 }
 
 export interface Players {
@@ -139,7 +140,8 @@ class PlayersServiceHandler implements PlayersService {
         };
 
         const response = await this.connector.get(`/w/api.php`, queryOptions, true);
-        return (response as any).query.categorymembers as Player[];
+        return (response as any).query.categorymembers
+            .filter((item: Player) => item.type === 'page') as Player[];
     }
 
     async getById(): Promise<Player | null> {

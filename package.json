@@ -2,6 +2,7 @@
   "name": "react-typescript",
   "version": "1.0.0",
   "description": "React and TypeScript example starter project",
+  "type": "module",
   "keywords": [
     "typescript",
     "react",
@@ -9,9 +10,13 @@
   ],
   "main": "src/index.tsx",
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "clsx": "^2.1.1",
     "qs": "^6.14.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
     "@types/qs": "^6.14.0",
