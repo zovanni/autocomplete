@@ -5,7 +5,8 @@ import type { Player } from "./services/types";
 import { cn, delay } from "./lib/utils";
 import { useSearch } from "./hooks/useSearch";
 import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
-import { SearchInput } from "./components/searchInput";
+import { SearchInput } from "./components/SearchInput";
+import { SearchResults } from "./components/SearchResults";
 
 export default function App() {
     const [players, setPlayers] = useState<Player[]>([]);
@@ -48,8 +49,6 @@ export default function App() {
         });
     }, [selectedIndex]);
 
-    console.log(loading);
-
     return (
         <div
             className={cn(
@@ -89,73 +88,16 @@ export default function App() {
                                 No results found
                             </div>
                         )}
-                        {results.map((result, index) => (
-                            <div
-                                ref={(el) => (playerRefs.current[index] = el)}
-                                onClick={() => {
-                                    isSelectingRef.current = true; // Set flag before programmatic setSearch
-                                    setSearch(result.title);
-                                    setSelectedPlayer(result);
-                                    setSelectedIndex(index);
-                                }}
-                                className={cn(
-                                    "autocomplete-item",
-                                    "bg-white p-2",
-                                    "cursor-pointer",
-                                    selectedIndex === index &&
-                                        "bg-brand-primary-200"
-                                )}
-                            >
-                                {(() => {
-                                    const splitKeepSeparator = (
-                                        str: string,
-                                        separator: string
-                                    ) => {
-                                        const escaped = separator.replace(
-                                            /[.*+?^${}()|[\]\\]/g,
-                                            "\\$&"
-                                        ); // escape regex chars
-                                        const regex = new RegExp(
-                                            `(${escaped})`,
-                                            "gi"
-                                        );
-                                        return str.split(regex);
-                                    };
-
-                                    const input = result.title;
-                                    let res = splitKeepSeparator(
-                                        input,
-                                        search as string
-                                    );
-
-                                    if (res.length > 1) {
-                                        res = res.filter((element, index) => {
-                                            // Remove the first element if it's an empty string
-                                            return !(
-                                                element === "" && index === 0
-                                            );
-                                        });
-                                    }
-
-                                    return res.map((element, index) => {
-                                        return (
-                                            <span
-                                                className={cn(
-                                                    "highlight",
-                                                    element.toLowerCase() ===
-                                                        (
-                                                            search as string
-                                                        ).toLowerCase() &&
-                                                        "bg-brand-primary-500"
-                                                )}
-                                            >
-                                                {element}
-                                            </span>
-                                        );
-                                    });
-                                })()}
-                            </div>
-                        ))}
+                        <SearchResults
+                            results={results}
+                            playerRefs={playerRefs}
+                            isSelectingRef={isSelectingRef}
+                            setSearch={setSearch}
+                            setSelectedPlayer={setSelectedPlayer}
+                            setSelectedIndex={setSelectedIndex}
+                            selectedIndex={selectedIndex}
+                            search={search as string}
+                        />
                     </div>
                 )}
             </div>

@@ -101,8 +101,14 @@ const SearchInput = ({
                 value={search || ""}
                 type="text"
                 placeholder="Search"
-                className="bg-brand-primary-100 p-6 w-full indent-10
-                            "
+                className="bg-brand-primary-100 p-6 w-full indent-10"
+                role="combobox"
+                aria-expanded={results.length > 0}
+                aria-activedescendant={
+                    selectedIndex >= 0 ? `option-${selectedIndex}` : undefined
+                }
+                aria-autocomplete="list"
+                aria-label="Search for tennis players"
             />
         </div>
     );
