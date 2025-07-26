@@ -15,7 +15,7 @@
     },
     "Development": {
       "name": "Development",
-      "command": "npm dev",
+      "command": "npm run dev",
       "runAtStart": true,
       "preview": {
         "port": 5173
