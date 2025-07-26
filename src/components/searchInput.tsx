@@ -59,9 +59,9 @@ const SearchInput = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         className="lucide stroke-brand-primary-900 lucide-loader-circle-icon lucide-loader-circle"
                     >
                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -74,9 +74,9 @@ const SearchInput = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         className="lucide stroke-brand-primary-900 lucide-search-icon lucide-search"
                     >
                         <path d="m21 21-4.34-4.34" />
