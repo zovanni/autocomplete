@@ -1,73 +1,77 @@
-import { useRef, memo } from "react";
-import type { KeyboardEvent } from "react";
+import { memo } from "react";
 import type { Player } from "../services/types";
 import { cn } from "../lib/utils";
 
-const HighlightedText = ({
-    text,
-    highlight,
-}: {
-    text: string;
-    highlight: string;
-}) => {
-    const splitKeepSeparator = (str: string, separator: string) => {
-        const escaped = separator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // escape regex chars
-        const regex = new RegExp(`(${escaped})`, "gi");
-        return str.split(regex);
-    };
+const HighlightedText = memo(
+    ({ text, highlight }: { text: string; highlight: string }) => {
+        // Early exit
+        if (!highlight || !text) return <span>{text}</span>;
 
-    const input = text;
-    let res = splitKeepSeparator(input, highlight as string);
+        const splitKeepSeparator = (str: string, separator: string) => {
+            const escaped = separator.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const regex = new RegExp(`(${escaped})`, "gi");
+            return str.split(regex);
+        };
 
-    if (res.length > 1) {
-        res = res.filter((element, index) => {
-            // Remove the first element if it's an empty string
-            return !(element === "" && index === 0);
-        });
-    }
+        let res = splitKeepSeparator(text, highlight);
 
-    return res.map((element, index) => {
+        if (res.length > 1) {
+            res = res.filter((element, index) => {
+                // Remove the first element if it's an empty string
+                return !(element === "" && index === 0);
+            });
+        }
+
         return (
-            <span
-                className={cn(
-                    "highlight",
-                    element.toLowerCase() ===
-                        (highlight as string).toLowerCase() &&
-                        "bg-brand-primary-500"
-                )}
-            >
-                {element}
-            </span>
+            <>
+                {res.map((element, index) => (
+                    <span
+                        key={index}
+                        className={cn(
+                            "highlight",
+                            element.toLowerCase() === highlight.toLowerCase() &&
+                                "bg-brand-primary-500"
+                        )}
+                    >
+                        {element}
+                    </span>
+                ))}
+            </>
         );
-    });
-};
+    }
+);
 
-const SearchResults = ({
-    results,
-    playerRefs,
-    isSelectingRef,
-    setSearch,
-    setSelectedPlayer,
-    setSelectedIndex,
-    selectedIndex,
-    search,
-}: {
-    results: Player[];
-    playerRefs: React.MutableRefObject<{
-        [key: string]: HTMLDivElement | null;
-    }>;
-    isSelectingRef: React.MutableRefObject<boolean>;
-    setSearch: React.Dispatch<React.SetStateAction<string | null>>;
-    setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
-    setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
-    selectedIndex: number;
-    search: string | null;
-}) => {
-    return (
-        <>
+HighlightedText.displayName = "HighlightedText";
+
+const SearchResults = memo(
+    ({
+        results,
+        playerRefs,
+        isSelectingRef,
+        setSearch,
+        setSelectedPlayer,
+        setSelectedIndex,
+        selectedIndex,
+        search,
+    }: {
+        results: Player[];
+        playerRefs: React.MutableRefObject<{
+            [key: string]: HTMLDivElement | null;
+        }>;
+        isSelectingRef: React.MutableRefObject<boolean>;
+        setSearch: (search: string | null) => void;
+        setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
+        setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
+        selectedIndex: number;
+        search: string;
+    }) => {
+        if (!results.length) return null;
+
+        return (
             <div role="listbox" aria-label="Search results">
                 {results.map((result, index) => (
                     <div
+                        key={result.pageid}
                         role="option"
                         id={`option-${index}`}
                         aria-selected={selectedIndex === index}
@@ -85,15 +89,14 @@ const SearchResults = ({
                             selectedIndex === index && "bg-brand-primary-200"
                         )}
                     >
-                        {HighlightedText({
-                            text: result.title,
-                            highlight: search as string,
-                        })}
+                        <HighlightedText
+                            text={result.title}
+                            highlight={search}
+                        />
                     </div>
                 ))}
             </div>
-        </>
-    );
-};
-
+        );
+    }
+);
 export { SearchResults };

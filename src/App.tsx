@@ -10,11 +10,12 @@ import { SearchResults } from "./components/SearchResults";
 
 export default function App() {
     const [players, setPlayers] = useState<Player[]>([]);
-    const [search, setSearch] = useState<string | null>(null);
+    const [search, setSearch] = useState<string>("");
     const [results, setResults] = useState<Player[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const playerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
     const autocompleteItemsRef = useRef<HTMLDivElement>(null);
     const isSelectingRef = useRef<boolean>(false); // Track user selection and avoid mocked up delay
@@ -22,18 +23,26 @@ export default function App() {
     // initial call to get all players
     useEffect(() => {
         (async () => {
-            const playersService = new PlayersServiceHandler();
-            const res = await playersService
-                .getAll()
-                .then((response) => {
-                    setPlayers(response);
-                })
-                .catch((err) => console.log(err));
+            try {
+                setLoading(true);
+                setError(null);
+                await delay(500);
+                const playersService = new PlayersServiceHandler();
+                const response = await playersService.getAll();
+                setPlayers(response);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to load players:", err);
+                setError(
+                    "Failed to load tennis players. Please try again later."
+                );
+                setLoading(false);
+            }
         })();
     }, []);
 
     useSearch({
-        search: search as string,
+        search,
         setSearch,
         players,
         setResults,
@@ -49,6 +58,32 @@ export default function App() {
         });
     }, [selectedIndex]);
 
+    const handleSearchChange = (newSearch: string | null) => {
+        setSearch(newSearch || "");
+        if (!newSearch) {
+            setSelectedPlayer(null);
+        }
+    };
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen bg-brand-primary text-primary">
+                <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+                    <div className="text-red-600 text-lg font-semibold mb-4">
+                        Error
+                    </div>
+                    <div className="text-gray-700 mb-4">{error}</div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-brand-primary-500 text-white px-4 py-2 rounded hover:bg-brand-primary-600"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div
             className={cn(
@@ -57,16 +92,16 @@ export default function App() {
         >
             <div className="autocomplete w-2/3">
                 <SearchInput
-                    search={search as string}
-					setSearch={setSearch}
-					loading={loading}
-					results={results}
-					selectedIndex={selectedIndex}
-					setSelectedIndex={setSelectedIndex}
-					setSelectedPlayer={setSelectedPlayer}
-					playerRefs={playerRefs}
-					isSelectingRef={isSelectingRef}
-					useKeyboardNavigation={useKeyboardNavigation}
+                    search={search}
+                    setSearch={handleSearchChange}
+                    loading={loading}
+                    results={results}
+                    selectedIndex={selectedIndex}
+                    setSelectedIndex={setSelectedIndex}
+                    setSelectedPlayer={setSelectedPlayer}
+                    playerRefs={playerRefs}
+                    isSelectingRef={isSelectingRef}
+                    useKeyboardNavigation={useKeyboardNavigation}
                 />
 
                 {isSelectingRef?.current ? (
@@ -82,22 +117,24 @@ export default function App() {
                             <div
                                 className={cn(
                                     "autocomplete-item",
-                                    "bg-white p-2"
+                                    "bg-white p-2 text-gray-500 text-center"
                                 )}
                             >
-                                No results found
+                                No players found for "{search}"
                             </div>
                         )}
-                        <SearchResults
-                            results={results}
-                            playerRefs={playerRefs}
-                            isSelectingRef={isSelectingRef}
-                            setSearch={setSearch}
-                            setSelectedPlayer={setSelectedPlayer}
-                            setSelectedIndex={setSelectedIndex}
-                            selectedIndex={selectedIndex}
-                            search={search as string}
-                        />
+                        {results.length > 0 && (
+                            <SearchResults
+                                results={results}
+                                playerRefs={playerRefs}
+                                isSelectingRef={isSelectingRef}
+                                setSearch={handleSearchChange}
+                                setSelectedPlayer={setSelectedPlayer}
+                                setSelectedIndex={setSelectedIndex}
+                                selectedIndex={selectedIndex}
+                                search={search}
+                            />
+                        )}
                     </div>
                 )}
             </div>

@@ -15,7 +15,7 @@ const useKeyboardNavigation = ({
     results: Player[];
     selectedIndex: number;
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
-    setSearch: React.Dispatch<React.SetStateAction<string | null>>;
+    setSearch: (search: string | null) => void;
     setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
     playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
     isSelectingRef: React.MutableRefObject<boolean>;
@@ -52,6 +52,12 @@ const useKeyboardNavigation = ({
                     ? results[selectedIndex + 1]
                     : results[0]
             );
+            break;
+        case "Escape":
+            event.preventDefault();
+            setSearch("");
+            setSelectedPlayer(null);
+            setSelectedIndex(0);
             break;
     }
 };
