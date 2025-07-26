@@ -2,17 +2,16 @@ import * as qs from "qs";
 
 
 export interface QueryOptions {
-    action: string;
-    list: string;
-    cmtitle: string;
-    cmlimit: string;
-    format: string;
-    origin: string;
+    action?: string;
+    list?: string;
+    cmtitle?: string;
+    cmlimit?: string;
+    format?: string;
 }
 
 
 export interface BaseContent {
-    documentId: string;
+    pageid: number;
 }
 
 export interface DataService<T extends BaseContent> {
@@ -27,11 +26,10 @@ export interface DataService<T extends BaseContent> {
 }
 
 export interface Player {
-    documentId: string;
-    name: string;
-    slug: string;
-    image: string;
-    position: string;
+    // {pageid: 11983898, ns: 0, title: 'Fabio Fognini'}
+    pageid: number;
+    ns: number;
+    title: string;
 }
 
 export interface Players {
@@ -77,8 +75,8 @@ export class WikiConnector {
     private async fetchFromWiki<T>(endpoint: string, queryOptions: QueryOptions, log: boolean = false): Promise<{ data: T[], meta: object }> {
         const query = this.buildQueryString(queryOptions);
 
-        // Use the Vite proxy instead of direct Wikipedia API
-        const url = `${import.meta.env.VITE_REMOTE_BASE}${endpoint}?${query}`;
+        // Use the Vite proxy instead of undefined VITE_REMOTE_BASE
+        const url = `/api/wikipedia${endpoint}?${query}`;
 
         if (log) {
             console.log('_________________________________________________________________');
@@ -89,9 +87,8 @@ export class WikiConnector {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Origin": "*",
-                "Access-Control-Allow-Origin": "*"
             },
+            // Remove CORS headers - they don't work from client-side
             // redirect: "follow" as RequestRedirect
         };
 
@@ -99,7 +96,7 @@ export class WikiConnector {
             const response = await fetch(url, requestOptions);
             if (!response.ok) {
                 console.error(response);
-                // throw new Error(`Failed to fetch from ${endpoint}: ${response.status}`);
+                throw new Error(`Failed to fetch from ${endpoint}: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
@@ -107,7 +104,7 @@ export class WikiConnector {
             console.error(url)
             console.error(`Error fetching from ${endpoint}:`, error);
             console.error('\n\n')
-            // throw error;
+            throw error;
         }
     }
 
@@ -129,18 +126,15 @@ class PlayersServiceHandler implements PlayersService {
     async getAll(): Promise<Player[]> {
 
         const queryOptions: QueryOptions = {
-            // https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:Italian_male_tennis_players&cmlimit=500&format=jso
-            // https://en.wikipedia.org/api/wikipedia/w/api.php?action=query&list=categorymembers&cmtitle=Category%3AItalian_male_tennis_players&cmlimit=500&format=json
             action: "query",
             list: "categorymembers",
             cmtitle: "Category:Italian_male_tennis_players",
             cmlimit: "500",
             format: "json",
-            origin: "*",
         };
 
         const response = await this.connector.get(`/w/api.php`, queryOptions, true);
-        return response.data as Player[];
+        return (response as any).query.categorymembers as Player[];
     }
 
     async getById(): Promise<Player | null> {
@@ -152,7 +146,7 @@ class PlayersServiceHandler implements PlayersService {
     }
 
     async getBySlug(slug: string): Promise<Player | null> {
-        const response = await this.connector.get(`/w/api.php`, { filters: { slug } });
+        const response = await this.connector.get(`/w/api.php`, {});
         if (Array.isArray(response.data) && response.data.length > 0) {
             return response.data[0] as Player;
         }
