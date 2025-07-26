@@ -4,8 +4,6 @@ import type { KeyboardEvent } from "react";
 import type { Player } from "./services/types";
 import { cn } from "./lib/utils";
 
-import "./styles.css";
-
 const useSearch = (
     players: Player[],
     search: string | null,
