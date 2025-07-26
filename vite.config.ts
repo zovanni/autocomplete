@@ -5,6 +5,14 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: ["q8ysdv-5173.csb.app"],
+    allowedHosts: true,
+    proxy: {
+      '/api/wikipedia': {
+        target: 'https://en.wikipedia.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/wikipedia/, ''),
+        secure: true,
+      }
+    }
   },
 });
