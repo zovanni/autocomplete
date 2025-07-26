@@ -75,11 +75,6 @@ const useKeyboardNavigation = (
             );
             break;
     }
-    // playerRefs.current?.[selectedIndex]?.scrollIntoView({
-    //     behavior: "smooth",
-    //     block: "center", // Only scroll if needed
-    //     inline: "nearest",
-    // });
 };
 
 export default function App() {
@@ -110,8 +105,7 @@ export default function App() {
 
     useEffect(() => {
         playerRefs.current?.[selectedIndex]?.scrollIntoView({
-            // behavior: "smooth",
-            block: "center", // Only scroll if needed
+            block: "center",
             inline: "nearest",
         });
     }, [selectedIndex]);
