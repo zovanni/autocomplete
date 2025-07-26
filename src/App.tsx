@@ -5,8 +5,8 @@ import type { Player } from "./services/types";
 import { cn, delay } from "./lib/utils";
 import { useSearch } from "./hooks/useSearch";
 import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
-import { SearchInput } from "./components/SearchInput";
-import { SearchResults } from "./components/SearchResults";
+import { SearchInput } from "./components/searchInput";
+import { SearchResults } from "./components/searchResults";
 
 export default function App() {
     const [players, setPlayers] = useState<Player[]>([]);
