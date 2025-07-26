@@ -62,12 +62,6 @@ const useKeyboardNavigation = (
                 prevIndex < results.length - 1 ? prevIndex + 1 : 0
             );
 
-            if (selectedIndex > results.length - 1) {
-                // back to top
-                console.log("back to top");
-                // playerRefs.current?.[0]?.scrollIntoView({});
-            }
-
             setSelectedPlayer(
                 selectedIndex < results.length - 1
                     ? results[selectedIndex + 1]
