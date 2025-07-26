@@ -33,7 +33,8 @@ const useKeyboardNavigation = (
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>,
     setResults: React.Dispatch<React.SetStateAction<Player[]>>,
     setSearch: React.Dispatch<React.SetStateAction<string | null>>,
-    setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>
+    setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>,
+    playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>
 ) => {
     event = event || window.event;
     switch (event.key) {
@@ -60,6 +61,13 @@ const useKeyboardNavigation = (
             setSelectedIndex((prevIndex: number) =>
                 prevIndex < results.length - 1 ? prevIndex + 1 : 0
             );
+
+            if (selectedIndex > results.length - 1) {
+                // back to top
+                console.log("back to top");
+                // playerRefs.current?.[0]?.scrollIntoView({});
+            }
+
             setSelectedPlayer(
                 selectedIndex < results.length - 1
                     ? results[selectedIndex + 1]
@@ -67,6 +75,11 @@ const useKeyboardNavigation = (
             );
             break;
     }
+    // playerRefs.current?.[selectedIndex]?.scrollIntoView({
+    //     behavior: "smooth",
+    //     block: "center", // Only scroll if needed
+    //     inline: "nearest",
+    // });
 };
 
 export default function App() {
@@ -95,6 +108,14 @@ export default function App() {
         })();
     }, []);
 
+    useEffect(() => {
+        playerRefs.current?.[selectedIndex]?.scrollIntoView({
+            // behavior: "smooth",
+            block: "center", // Only scroll if needed
+            inline: "nearest",
+        });
+    }, [selectedIndex]);
+
     return (
         <div
             className={cn(
@@ -112,7 +133,8 @@ export default function App() {
                             setSelectedIndex,
                             setResults,
                             setSearch,
-                            setSelectedPlayer
+                            setSelectedPlayer,
+                            playerRefs
                         );
                     }}
                     value={search || ""}
@@ -122,6 +144,7 @@ export default function App() {
                 />
                 {results.length === 1 &&
                     results[0] === selectedPlayer &&
+                    selectedPlayer.title === search &&
                     "djkaskdjkasjksaklj"}
                 <div
                     className="autocomplete-items max-h-[60vh] overflow-y-auto"
