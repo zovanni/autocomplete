@@ -1,30 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { PlayersService, PlayersServiceHandler } from "./services/types";
+import { PlayersServiceHandler } from "./services/types";
 import type { KeyboardEvent } from "react";
 import type { Player } from "./services/types";
-import { cn } from "./lib/utils";
-
-const useSearch = (
-    players: Player[],
-    search: string | null,
-    results: Player[],
-    setResults: (results: Player[]) => void,
-    selectedIndex: number,
-    setSelectedIndex: (index: number) => void
-) => {
-    useEffect(() => {
-        if (!search) {
-            setResults([]);
-        }
-        if (search) {
-            const filteredPlayers = players.filter((player) =>
-                player.title.toLowerCase().includes(search.toLowerCase())
-            );
-            setSelectedIndex(0);
-            setResults(filteredPlayers);
-        }
-    }, [search]);
-};
+import { cn, delay } from "./lib/utils";
 
 const useKeyboardNavigation = (
     event: KeyboardEvent<Element>,
@@ -34,13 +12,15 @@ const useKeyboardNavigation = (
     setResults: React.Dispatch<React.SetStateAction<Player[]>>,
     setSearch: React.Dispatch<React.SetStateAction<string | null>>,
     setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>,
-    playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>
+    playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>,
+    isSelectingRef: React.MutableRefObject<boolean>
 ) => {
     event = event || window.event;
     switch (event.key) {
         case "Enter":
             event.preventDefault();
             if (results[selectedIndex]) {
+                isSelectingRef.current = true; // Set flag before programmatic setSearch
                 setSearch(results[selectedIndex].title);
                 setSelectedPlayer(results[selectedIndex]);
             }
@@ -79,23 +59,46 @@ export default function App() {
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
     const playerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
     const autocompleteItemsRef = useRef<HTMLDivElement>(null);
+    const isSelectingRef = useRef<boolean>(false); // Track programmatic selection
 
-    useSearch(
-        players,
-        search,
-        results,
-        setResults,
-        selectedIndex,
-        setSelectedIndex
-    );
-
+    // initial call to get all players
     useEffect(() => {
         (async () => {
             const playersService = new PlayersServiceHandler();
-            const res = await playersService.getAll();
-            setPlayers(res);
+            const res = await playersService
+                .getAll()
+                .then((response) => {
+                    setPlayers(response);
+                })
+                .catch((err) => console.log(err));
         })();
     }, []);
+
+    useEffect(() => {
+        if (!search) {
+            setResults([]);
+            return;
+        }
+
+        // Skip delay if we're programmatically selecting a result
+        if (isSelectingRef.current) {
+            isSelectingRef.current = false;
+            return;
+        }
+
+        // Use a timeout to debounce the search and simulate delay
+        const timeoutId = setTimeout(async () => {
+            await delay(500); // Simulate API delay
+            const filteredPlayers = players.filter((player) =>
+                player.title.toLowerCase().includes(search.toLowerCase())
+            );
+            setSelectedIndex(0);
+            setResults(filteredPlayers);
+        }, 300); // Debounce delay
+
+        // Cleanup function to cancel the timeout if search changes
+        return () => clearTimeout(timeoutId);
+    }, [search, players]);
 
     useEffect(() => {
         playerRefs.current?.[selectedIndex]?.scrollIntoView({
@@ -103,6 +106,8 @@ export default function App() {
             inline: "nearest",
         });
     }, [selectedIndex]);
+
+    console.log(selectedPlayer?.title, isSelectingRef);
 
     return (
         <div
@@ -122,7 +127,8 @@ export default function App() {
                             setResults,
                             setSearch,
                             setSelectedPlayer,
-                            playerRefs
+                            playerRefs,
+                            isSelectingRef
                         );
                     }}
                     value={search || ""}
@@ -130,79 +136,83 @@ export default function App() {
                     placeholder="Search"
                     className="bg-brand-primary-100 p-6 w-full"
                 />
-                {results.length === 1 &&
-                    results[0] === selectedPlayer &&
-                    selectedPlayer.title === search &&
-                    "djkaskdjkasjksaklj"}
-                <div
-                    className="autocomplete-items max-h-[60vh] overflow-y-auto"
-                    ref={autocompleteItemsRef}
-                >
-                    {results.map((result, index) => (
-                        <div
-                            ref={(el) => (playerRefs.current[index] = el)}
-                            onClick={() => {
-                                setSearch(result.title);
-                                setSelectedPlayer(result);
-                                setSelectedIndex(index);
-                            }}
-                            className={cn(
-                                "autocomplete-item",
-                                "bg-white p-2",
-                                "cursor-pointer",
-                                selectedIndex === index &&
-                                    "bg-brand-primary-200"
-                            )}
-                        >
-                            {(() => {
-                                const splitKeepSeparator = (
-                                    str: string,
-                                    separator: string
-                                ) => {
-                                    const escaped = separator.replace(
-                                        /[.*+?^${}()|[\]\\]/g,
-                                        "\\$&"
-                                    ); // escape regex chars
-                                    const regex = new RegExp(
-                                        `(${escaped})`,
-                                        "gi"
+
+                {isSelectingRef?.current ? (
+                    selectedPlayer?.title
+                ) : (
+                    <div
+                        className="autocomplete-items max-h-[60vh] overflow-y-auto"
+                        ref={autocompleteItemsRef}
+                    >
+                        {results.map((result, index) => (
+                            <div
+                                ref={(el) => (playerRefs.current[index] = el)}
+                                onClick={() => {
+                                    isSelectingRef.current = true; // Set flag before programmatic setSearch
+                                    setSearch(result.title);
+                                    setSelectedPlayer(result);
+                                    setSelectedIndex(index);
+                                }}
+                                className={cn(
+                                    "autocomplete-item",
+                                    "bg-white p-2",
+                                    "cursor-pointer",
+                                    selectedIndex === index &&
+                                        "bg-brand-primary-200"
+                                )}
+                            >
+                                {(() => {
+                                    const splitKeepSeparator = (
+                                        str: string,
+                                        separator: string
+                                    ) => {
+                                        const escaped = separator.replace(
+                                            /[.*+?^${}()|[\]\\]/g,
+                                            "\\$&"
+                                        ); // escape regex chars
+                                        const regex = new RegExp(
+                                            `(${escaped})`,
+                                            "gi"
+                                        );
+                                        return str.split(regex);
+                                    };
+
+                                    const input = result.title;
+                                    let res = splitKeepSeparator(
+                                        input,
+                                        search as string
                                     );
-                                    return str.split(regex);
-                                };
 
-                                const input = result.title;
-                                let res = splitKeepSeparator(
-                                    input,
-                                    search as string
-                                );
+                                    if (res.length > 1) {
+                                        res = res.filter((element, index) => {
+                                            // Remove the first element if it's an empty string
+                                            return !(
+                                                element === "" && index === 0
+                                            );
+                                        });
+                                    }
 
-                                if (res.length > 1) {
-                                    res = res.filter((element, index) => {
-                                        // Remove the first element if it's an empty string
-                                        return !(element === "" && index === 0);
+                                    return res.map((element, index) => {
+                                        return (
+                                            <span
+                                                className={cn(
+                                                    "highlight",
+                                                    element.toLowerCase() ===
+                                                        (
+                                                            search as string
+                                                        ).toLowerCase() &&
+                                                        "bg-brand-primary-500"
+                                                )}
+                                            >
+                                                {element}
+                                            </span>
+                                        );
                                     });
-                                }
-
-                                return res.map((element, index) => {
-                                    return (
-                                        <span
-                                            className={cn(
-                                                "highlight",
-                                                element.toLowerCase() ===
-                                                    (
-                                                        search as string
-                                                    ).toLowerCase() &&
-                                                    "bg-brand-primary-500"
-                                            )}
-                                        >
-                                            {element}
-                                        </span>
-                                    );
-                                });
-                            })()}
-                        </div>
-                    ))}
-                </div>
+                                })()}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
