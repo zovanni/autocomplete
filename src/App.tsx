@@ -5,6 +5,7 @@ import type { Player } from "./services/types";
 import { cn, delay } from "./lib/utils";
 import { useSearch } from "./hooks/useSearch";
 import { useKeyboardNavigation } from "./hooks/useKeyboardNavigation";
+import { SearchInput } from "./components/searchInput";
 
 export default function App() {
     const [players, setPlayers] = useState<Player[]>([]);
@@ -56,70 +57,38 @@ export default function App() {
             )}
         >
             <div className="autocomplete w-2/3">
-                <div className="relative">
-                    <div className={cn("loading w-6 h-6 absolute left-6 top-1/2 -translate-y-1/2", search && loading && "animate-spin")}>
-                        {loading ? (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                className="lucide stroke-brand-primary-900 lucide-loader-circle-icon lucide-loader-circle"
-                            >
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                            </svg>
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                className="lucide stroke-brand-primary-900 lucide-search-icon lucide-search"
-                            >
-                                <path d="m21 21-4.34-4.34" />
-                                <circle cx="11" cy="11" r="8" />
-                            </svg>
-                        )}
-                    </div>
-                    <input
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            useKeyboardNavigation({
-                                event: e as KeyboardEvent<Element>,
-                                results,
-                                selectedIndex,
-                                setSelectedIndex,
-                                setSearch,
-                                setSelectedPlayer,
-                                playerRefs,
-                                isSelectingRef,
-                            });
-                        }}
-                        value={search || ""}
-                        type="text"
-                        placeholder="Search"
-                        className="bg-brand-primary-100 p-6 w-full indent-10
-						"
-                    />
-                </div>
+                <SearchInput
+                    search={search as string}
+					setSearch={setSearch}
+					loading={loading}
+					results={results}
+					selectedIndex={selectedIndex}
+					setSelectedIndex={setSelectedIndex}
+					setSelectedPlayer={setSelectedPlayer}
+					playerRefs={playerRefs}
+					isSelectingRef={isSelectingRef}
+					useKeyboardNavigation={useKeyboardNavigation}
+                />
 
                 {isSelectingRef?.current ? (
-                    selectedPlayer?.title
+                    <div className={cn("autocomplete-item", "bg-white p-2 mt-6 p-6")}>
+                        {selectedPlayer?.title}
+                    </div>
                 ) : (
                     <div
                         className="autocomplete-items max-h-[60vh] overflow-y-auto"
                         ref={autocompleteItemsRef}
                     >
+                        {!results.length && !loading && search && (
+                            <div
+                                className={cn(
+                                    "autocomplete-item",
+                                    "bg-white p-2"
+                                )}
+                            >
+                                No results found
+                            </div>
+                        )}
                         {results.map((result, index) => (
                             <div
                                 ref={(el) => (playerRefs.current[index] = el)}
