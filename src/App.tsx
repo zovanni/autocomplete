@@ -14,6 +14,7 @@ export default function App() {
     const [results, setResults] = useState<Player[]>([]);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+    const [firstLoading, setFirstLoading] = useState<boolean>(false); // for players from remote API
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const playerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -24,18 +25,21 @@ export default function App() {
     useEffect(() => {
         (async () => {
             try {
+                setFirstLoading(true);
                 setLoading(true);
                 setError(null);
-                await delay(500);
+                await delay(1000);
                 const playersService = new PlayersServiceHandler();
                 const response = await playersService.getAll();
                 setPlayers(response);
+                setFirstLoading(false);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to load players:", err);
                 setError(
                     "Failed to load tennis players. Please try again later."
                 );
+                setFirstLoading(false);
                 setLoading(false);
             }
         })();
@@ -90,54 +94,65 @@ export default function App() {
                 "flex flex-col items-center justify-start h-screen bg-brand-primary text-primary py-20"
             )}
         >
-            <div className="autocomplete w-2/3">
-                <SearchInput
-                    search={search}
-                    setSearch={handleSearchChange}
-                    loading={loading}
-                    results={results}
-                    selectedIndex={selectedIndex}
-                    setSelectedIndex={setSelectedIndex}
-                    setSelectedPlayer={setSelectedPlayer}
-                    playerRefs={playerRefs}
-                    isSelectingRef={isSelectingRef}
-                    useKeyboardNavigation={useKeyboardNavigation}
-                />
+            {firstLoading ? (
+                <div className="flex flex-col items-center justify-center h-screen bg-brand-primary text-primary">
+                    <h2 className="text-2xl font-bold">Loading...</h2>
+                </div>
+            ) : (
+                <div className="autocomplete w-2/3">
+                    <SearchInput
+                        search={search}
+                        setSearch={handleSearchChange}
+                        loading={loading}
+                        results={results}
+                        selectedIndex={selectedIndex}
+                        setSelectedIndex={setSelectedIndex}
+                        setSelectedPlayer={setSelectedPlayer}
+                        playerRefs={playerRefs}
+                        isSelectingRef={isSelectingRef}
+                        useKeyboardNavigation={useKeyboardNavigation}
+                    />
 
-                {isSelectingRef?.current ? (
-                    <div className={cn("autocomplete-item", "bg-white p-2 mt-6 p-6")}>
-                        {selectedPlayer?.title}
-                    </div>
-                ) : (
-                    <div
-                        className="autocomplete-items max-h-[60vh] overflow-y-auto"
-                        ref={autocompleteItemsRef}
-                    >
-                        {!results.length && !loading && search && (
-                            <div
-                                className={cn(
-                                    "autocomplete-item",
-                                    "bg-white p-2 text-gray-500 text-center"
-                                )}
-                            >
-                                No players found for "{search}"
-                            </div>
-                        )}
-                        {results.length > 0 && (
-                            <SearchResults
-                                results={results}
-                                playerRefs={playerRefs}
-                                isSelectingRef={isSelectingRef}
-                                setSearch={handleSearchChange}
-                                setSelectedPlayer={setSelectedPlayer}
-                                setSelectedIndex={setSelectedIndex}
-                                selectedIndex={selectedIndex}
-                                search={search}
-                            />
-                        )}
-                    </div>
-                )}
-            </div>
+                    {isSelectingRef?.current ? (
+                        <div
+                            className={cn(
+                                "autocomplete-item",
+                                "bg-white p-2 mt-6 p-6"
+                            )}
+                        >
+                            {selectedPlayer?.title}
+                        </div>
+                    ) : (
+                        <div
+                            className="autocomplete-items max-h-[60vh] overflow-y-auto"
+                            ref={autocompleteItemsRef}
+                        >
+                            {!results.length && !loading && search && (
+                                <div
+                                    className={cn(
+                                        "autocomplete-item",
+                                        "bg-white p-2 text-gray-500 text-center"
+                                    )}
+                                >
+                                    No players found for "{search}"
+                                </div>
+                            )}
+                            {results.length > 0 && (
+                                <SearchResults
+                                    results={results}
+                                    playerRefs={playerRefs}
+                                    isSelectingRef={isSelectingRef}
+                                    setSearch={handleSearchChange}
+                                    setSelectedPlayer={setSelectedPlayer}
+                                    setSelectedIndex={setSelectedIndex}
+                                    selectedIndex={selectedIndex}
+                                    search={search}
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
