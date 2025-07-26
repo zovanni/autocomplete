@@ -7,6 +7,7 @@ export interface QueryOptions {
     cmtitle?: string;
     cmlimit?: string;
     format?: string;
+    cmprop?: string;
 }
 
 
@@ -125,12 +126,16 @@ class PlayersServiceHandler implements PlayersService {
 
     async getAll(): Promise<Player[]> {
 
+        /**
+         * @see https://www.mediawiki.org/wiki/API:Categorymembers
+         */
         const queryOptions: QueryOptions = {
             action: "query",
             list: "categorymembers",
             cmtitle: "Category:Italian_male_tennis_players",
             cmlimit: "500",
             format: "json",
+            cmprop: "pageid|title|type|sortkeyprefix",
         };
 
         const response = await this.connector.get(`/w/api.php`, queryOptions, true);

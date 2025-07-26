@@ -13,12 +13,12 @@ export default function App() {
         let isMounted = true;
         (async () => {
             const playersService = new PlayersServiceHandler();
-            const players = await playersService.getAll();
-            console.log(players);
-            console.log(players);
-            console.log(players);
-          console.log(players);
-          setPlayers(players);
+            const res = await playersService.getAll();
+            console.log(res);
+            console.log(res);
+            console.log(res);
+          console.log(res);
+          setPlayers(res);
         })();
     }, []);
   
