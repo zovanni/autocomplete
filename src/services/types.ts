@@ -15,17 +15,6 @@ export interface BaseContent {
     pageid: number;
 }
 
-export interface DataService<T extends BaseContent> {
-    /** Retrieves all entities of type `T`. */
-    getAll(): Promise<T[]>;
-
-    /** Retrieves a single entity by its unique identifier. */
-    getById(id: string): Promise<T | null>;
-
-    getBySlug(slug: string): Promise<T | null>;
-
-}
-
 export interface Player {
     // {pageid: 11983898, ns: 0, title: 'Fabio Fognini'}
     pageid: number;
@@ -42,11 +31,11 @@ export interface PlayersResponse {
     data: Players[];
 }
 
-export interface PlayersService extends DataService<Player> {
+export interface PlayersService<Player> {
     /** Retrieves all players. */
     getAll(): Promise<Player[]>;
     /** Retrieves a player by its slug with language support. */
-    getBySlug(slug: string): Promise<Player | null>;
+    getByName(slug: string): Promise<Player | null>;
 }
 
 export class WikiConnector {
@@ -117,7 +106,7 @@ export class WikiConnector {
 }
 
 
-class PlayersServiceHandler implements PlayersService {
+class PlayersServiceHandler implements PlayersService<Player> {
 
     protected connector: WikiConnector;
 
@@ -145,18 +134,18 @@ class PlayersServiceHandler implements PlayersService {
     }
 
     async getById(): Promise<Player | null> {
-        const response = await this.connector.get(`/w/api.php`, {});
-        if (Array.isArray(response.data) && response.data.length > 0) {
-            return response.data[0] as Player;
-        }
+        // const response = await this.connector.get(`/w/api.php`, {});
+        // if (Array.isArray(response.data) && response.data.length > 0) {
+        //     return response.data[0] as Player;
+        // }
         return null;
     }
 
-    async getBySlug(slug: string): Promise<Player | null> {
-        const response = await this.connector.get(`/w/api.php`, {});
-        if (Array.isArray(response.data) && response.data.length > 0) {
-            return response.data[0] as Player;
-        }
+    async getByName(slug: string): Promise<Player | null> {
+        // const response = await this.connector.get(`/w/api.php`, {});
+        // if (Array.isArray(response.data) && response.data.length > 0) {
+        //     return response.data[0] as Player;
+        // }
         return null;
     }
 
