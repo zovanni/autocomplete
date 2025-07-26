@@ -20,7 +20,7 @@ const useKeyboardNavigation = ({
     playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
     isSelectingRef: React.MutableRefObject<boolean>;
 }) => {
-    event = event || window.event;
+
     switch (event.key) {
         case "Enter":
             event.preventDefault();
