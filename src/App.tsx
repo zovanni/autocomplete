@@ -46,7 +46,6 @@ export default function App() {
 
     useSearch({
         search,
-        setSearch,
         players,
         setResults,
         setLoading,

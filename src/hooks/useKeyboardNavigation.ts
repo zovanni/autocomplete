@@ -1,6 +1,16 @@
 import type { KeyboardEvent } from "react";
 import type { Player } from "../services/types";
 
+export interface KeyboardNavigationProps {
+    event: KeyboardEvent<Element>;
+    results: Player[];
+    selectedIndex: number;
+    setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
+    setSearch: (search: string | null) => void;
+    setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
+    isSelectingRef: React.MutableRefObject<boolean>;
+}
+
 const useKeyboardNavigation = ({
     event,
     results,
@@ -8,18 +18,8 @@ const useKeyboardNavigation = ({
     setSelectedIndex,
     setSearch,
     setSelectedPlayer,
-    playerRefs,
     isSelectingRef,
-}: {
-    event: KeyboardEvent<Element>;
-    results: Player[];
-    selectedIndex: number;
-    setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
-    setSearch: (search: string | null) => void;
-    setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
-    playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
-    isSelectingRef: React.MutableRefObject<boolean>;
-}) => {
+}: KeyboardNavigationProps) => {
 
     switch (event.key) {
         case "Enter":

@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { KeyboardEvent } from "react";
 import type { Player } from "../services/types";
 import { cn } from "../lib/utils";
+import type { KeyboardNavigationProps } from "../hooks/useKeyboardNavigation";
 
 interface SearchInputProps {
     search: string;
@@ -13,16 +14,7 @@ interface SearchInputProps {
     setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
     playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
     isSelectingRef: React.MutableRefObject<boolean>;
-    useKeyboardNavigation: (params: {
-        event: KeyboardEvent<Element>;
-        results: Player[];
-        selectedIndex: number;
-        setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
-        setSearch: (search: string | null) => void;
-        setSelectedPlayer: React.Dispatch<React.SetStateAction<Player | null>>;
-        playerRefs: React.RefObject<{ [key: string]: HTMLDivElement | null }>;
-        isSelectingRef: React.MutableRefObject<boolean>;
-    }) => void;
+    useKeyboardNavigation: (params: KeyboardNavigationProps) => void;
 }
 
 const SearchInput = ({
@@ -46,7 +38,6 @@ const SearchInput = ({
             setSelectedIndex,
             setSearch,
             setSelectedPlayer,
-            playerRefs,
             isSelectingRef,
         });
     }, [useKeyboardNavigation, results, selectedIndex, setSelectedIndex, setSearch, setSelectedPlayer, playerRefs, isSelectingRef]);

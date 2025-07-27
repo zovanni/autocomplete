@@ -4,7 +4,6 @@ import { delay } from "../lib/utils";
 
 const useSearch = ({
     search,
-    setSearch,
     players,
     setResults,
     setLoading,
@@ -12,7 +11,6 @@ const useSearch = ({
     setSelectedIndex,
 }: {
     search: string;
-    setSearch: React.Dispatch<React.SetStateAction<string>>
     players: Player[];
     setResults: (results: Player[]) => void;
     setLoading: (loading: boolean) => void;
