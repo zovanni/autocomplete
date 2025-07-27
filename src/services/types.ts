@@ -140,14 +140,15 @@ class PlayersServiceHandler implements PlayersService<Player> {
         // merging results...
         const mergedResponse = [...(response as any).query.categorymembers, ...(secondResponse as any).query.categorymembers];
 
-        // ...and sorting by sortkeyprefix
+        // wiki does return sorted results, but we're sorting again because at this point
+        // we have results from two different categories, we use sortkeyprefix
         const sortedResponse = mergedResponse.sort((a: Player, b: Player) => a.sortkeyprefix.localeCompare(b.sortkeyprefix));
 
-        // finally,  we filter out subcategories items
+        // finally, we filter out subcategories items
         const filteredResponse = sortedResponse.filter((item: Player) => item.type === 'page');
 
         return filteredResponse;
-        
+
     }
 
     async getById(): Promise<Player | null> {
