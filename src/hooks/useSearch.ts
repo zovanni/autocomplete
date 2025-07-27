@@ -45,7 +45,6 @@ const useSearch = ({
         setLoading(true);
         const timeoutId = setTimeout(async () => {
             try {
-                await delay(500); // Simulate API delay
                 setSelectedIndex(0);
                 setResults(filteredPlayers);
                 setLoading(false);
@@ -54,7 +53,7 @@ const useSearch = ({
                 setResults([]);
                 setLoading(false);
             }
-        }, 300); // Debounce delay
+        }, 500); // Debounce delay
 
         // Cleanup function to cancel the timeout if search changes
         return () => clearTimeout(timeoutId);
