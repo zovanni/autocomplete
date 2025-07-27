@@ -1,6 +1,3 @@
-import * as qs from "qs";
-
-
 export interface QueryOptions {
     action?: string;
     list?: string;
@@ -10,13 +7,12 @@ export interface QueryOptions {
     cmprop?: string;
 }
 
-
 export interface BaseContent {
     pageid: number;
 }
 
 export interface Player {
-    // {pageid: 11983898, ns: 0, title: 'Fabio Fognini'}
+    /** e.g. { "ns": 0, "title": "Fabio Fognini", "sortkeyprefix": "Fognini, Fabio", "type": "page"} */
     pageid: number;
     ns: number;
     title: string;
@@ -35,6 +31,6 @@ export interface PlayersResponse {
 export interface PlayersService<Player> {
     /** Retrieves all players. */
     getAll(): Promise<Player[]>;
-    /** Retrieves a player by its slug with language support. */
+    /** Retrieves a player by its slug */
     getByName(slug: string): Promise<Player | null>;
 }

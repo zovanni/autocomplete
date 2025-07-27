@@ -1,8 +1,6 @@
-import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { PlayersService } from "../services/types";
-import type { KeyboardEvent } from "react";
+import React, { useEffect, useMemo } from "react";
 import type { Player } from "../services/types";
-import { cn, delay } from "../lib/utils";
+import { delay } from "../lib/utils";
 
 const useSearch = ({
     search,

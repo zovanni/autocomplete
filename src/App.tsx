@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { PlayersService } from "./services/factory";
-import type { KeyboardEvent } from "react";
 import type { Player } from "./services/types";
 import { cn, delay } from "./lib/utils";
 import { useSearch } from "./hooks/useSearch";
