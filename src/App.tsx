@@ -117,7 +117,7 @@ export default function App() {
                         <div
                             className={cn(
                                 "autocomplete-item",
-                                "bg-white p-2 mt-6 p-6"
+                                "bg-white mt-6 p-6"
                             )}
                         >
                             {selectedPlayer?.title}
