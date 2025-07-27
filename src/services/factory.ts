@@ -92,7 +92,7 @@ class PlayersService implements PlayersServiceInterface<Player> {
                 cmtitle: "Category:Italian_male_tennis_players",
                 cmlimit: "500",
                 format: "json",
-                cmprop: "pageid|title|type|sortkeyprefix",
+                cmprop: "ids|title|type|sortkeyprefix",
             };
 
             // getting first results, male players
