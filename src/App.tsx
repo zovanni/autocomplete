@@ -70,14 +70,16 @@ export default function App() {
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-brand-primary text-primary">
-                <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+                <div className="text-center p-8 bg-white shadow-lg max-w-md min-w-90">
                     <div className="text-red-600 text-lg font-semibold mb-4">
                         Error
                     </div>
-                    <div className="text-gray-700 mb-4">{error}</div>
+                    <div className="text-gray-700 mb-4">
+                        {error || "Error loaging players"}
+                    </div>
                     <button
                         onClick={() => window.location.reload()}
-                        className="bg-brand-primary-500 text-white px-4 py-2 rounded hover:bg-brand-primary-600"
+                        className="bg-brand-primary-500 text-white px-4 py-2 hover:bg-brand-primary-600"
                     >
                         Retry
                     </button>
@@ -94,7 +96,27 @@ export default function App() {
         >
             {firstLoading ? (
                 <div className="flex flex-col items-center justify-center h-screen bg-brand-primary text-primary">
-                    <h2 className="text-2xl font-bold">Loading...</h2>
+                    <div
+                        className={cn(
+                            "loading animate-spin flex items-center justify-center"
+                        )}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="90"
+                            height="90"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide stroke-white lucide-loader-circle-icon lucide-loader-circle"
+                            aria-hidden="true"
+                        >
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                    </div>
                 </div>
             ) : (
                 <div className="autocomplete w-2/3">
