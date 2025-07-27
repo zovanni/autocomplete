@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { PlayersServiceHandler } from "./services/types";
+import { PlayersService } from "./services/factory";
 import type { KeyboardEvent } from "react";
 import type { Player } from "./services/types";
 import { cn, delay } from "./lib/utils";
@@ -29,7 +29,7 @@ export default function App() {
                 setLoading(true);
                 setError(null);
                 await delay(1000);
-                const playersService = new PlayersServiceHandler();
+                const playersService = new PlayersService();
                 const response = await playersService.getAll();
                 setPlayers(response);
                 setFirstLoading(false);

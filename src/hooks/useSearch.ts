@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { PlayersServiceHandler } from "../services/types";
+import { PlayersService } from "../services/types";
 import type { KeyboardEvent } from "react";
 import type { Player } from "../services/types";
 import { cn, delay } from "../lib/utils";
