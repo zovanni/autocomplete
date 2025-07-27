@@ -154,7 +154,13 @@ export default function App() {
                                         "bg-white p-2 text-gray-500 text-center"
                                     )}
                                 >
-                                    No players found for "{search}"
+                                    {(() => {
+                                        if (search.length > 1) {
+                                            return `No players found for "${search}"`;
+                                        } else {
+                                            return `Type at least 2 characters to search for a player`;
+                                        }
+                                    })()}
                                 </div>
                             )}
                             {results.length > 0 && (
