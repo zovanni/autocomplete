@@ -21,6 +21,7 @@ export interface Player {
     ns: number;
     title: string;
     type: 'page' | 'subcat';
+    sortkeyprefix: string;
 }
 
 export interface Players {
@@ -38,7 +39,7 @@ export interface PlayersService<Player> {
     getByName(slug: string): Promise<Player | null>;
 }
 
-export class WikiConnector {
+class WikiConnector {
     private static instance: WikiConnector;
 
     private constructor() { } // Previene istanziazione diretta
@@ -105,7 +106,6 @@ export class WikiConnector {
 
 }
 
-
 class PlayersServiceHandler implements PlayersService<Player> {
 
     protected connector: WikiConnector;
@@ -128,9 +128,26 @@ class PlayersServiceHandler implements PlayersService<Player> {
             cmprop: "pageid|title|type|sortkeyprefix",
         };
 
+        // getting first results, male players
         const response = await this.connector.get(`/w/api.php`, queryOptions, true);
-        return (response as any).query.categorymembers
-            .filter((item: Player) => item.type === 'page') as Player[];
+
+        // getting second results, female players
+        const secondResponse = await this.connector.get(`/w/api.php`, {
+            ...queryOptions,
+            cmtitle: "Category:Italian_female_tennis_players",
+        }, true);
+
+        // merging results...
+        const mergedResponse = [...(response as any).query.categorymembers, ...(secondResponse as any).query.categorymembers];
+
+        // ...and sorting by sortkeyprefix
+        const sortedResponse = mergedResponse.sort((a: Player, b: Player) => a.sortkeyprefix.localeCompare(b.sortkeyprefix));
+
+        // finally,  we filter out subcategories items
+        const filteredResponse = sortedResponse.filter((item: Player) => item.type === 'page');
+
+        return filteredResponse;
+        
     }
 
     async getById(): Promise<Player | null> {
