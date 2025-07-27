@@ -1,20 +1,6 @@
-import type { QueryOptions, Player, PlayersService as PlayersServiceInterface } from "./types";
+import type { QueryOptions, Player, PlayersService as PlayersServiceInterface, WikiApiResponse } from "./types";
 import qs from "qs";
 
-/**
- * Generic Wikipedia API response interface
- */
-interface WikiApiResponse<T = any> {
-    query?: {
-        categorymembers?: T[];
-        [key: string]: any;
-    };
-    error?: {
-        code: string;
-        info: string;
-    };
-    [key: string]: any;
-}
 class WikiConnector {
     private static instance: WikiConnector;
 

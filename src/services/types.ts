@@ -1,3 +1,21 @@
+/**
+ * Generic Wikipedia API response interface
+ */
+export interface WikiApiResponse<T = any> {
+    query?: {
+        categorymembers?: T[];
+        [key: string]: any;
+    };
+    error?: {
+        code: string;
+        info: string;
+    };
+    warnings?: {
+        [key: string]: any;
+    };
+    [key: string]: any;
+}
+
 export interface QueryOptions {
     action?: string;
     list?: string;
