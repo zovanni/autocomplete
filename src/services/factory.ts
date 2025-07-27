@@ -1,10 +1,24 @@
 import type { QueryOptions, Player, PlayersService as PlayersServiceInterface } from "./types";
 import qs from "qs";
 
+/**
+ * Generic Wikipedia API response interface
+ */
+interface WikiApiResponse<T = any> {
+    query?: {
+        categorymembers?: T[];
+        [key: string]: any;
+    };
+    error?: {
+        code: string;
+        info: string;
+    };
+    [key: string]: any;
+}
 class WikiConnector {
     private static instance: WikiConnector;
 
-    private constructor() { } // Previene istanziazione diretta
+    private constructor() { } // Prevents direct instantiation
 
     static getInstance(): WikiConnector {
         if (!WikiConnector.instance) {
@@ -24,9 +38,10 @@ class WikiConnector {
      * @todo error handling instad of direct throw
      * @param endpoint 
      * @param queryOptions 
-     * @returns 
+     * @param log - if true, will log the url
+     * @returns {query: { categorymembers: Player[] }}
      */
-    private async fetchFromWiki<T>(endpoint: string, queryOptions: QueryOptions, log: boolean = false): Promise<{ data: T[], meta: object }> {
+    private async fetchFromWiki<T>(endpoint: string, queryOptions: QueryOptions, log: boolean = false): Promise<WikiApiResponse> {
         const query = this.buildQueryString(queryOptions);
 
         // Use the Vite proxy instead of undefined VITE_REMOTE_BASE
@@ -62,7 +77,7 @@ class WikiConnector {
         }
     }
 
-    async get(endpoint: string, queryOptions: QueryOptions, log: boolean = false): Promise<{ data: unknown[], meta: object }> {
+    async get(endpoint: string, queryOptions: QueryOptions, log: boolean = false): Promise<WikiApiResponse> {
         return this.fetchFromWiki(endpoint, queryOptions, log);
     }
 
@@ -76,40 +91,51 @@ class PlayersService implements PlayersServiceInterface<Player> {
         this.connector = WikiConnector.getInstance();
     }
 
+    /**
+     * @returns {Player[]}
+     */
     async getAll(): Promise<Player[]> {
 
-        /**
-         * @see https://www.mediawiki.org/wiki/API:Categorymembers
-         */
-        const queryOptions: QueryOptions = {
-            action: "query",
-            list: "categorymembers",
-            cmtitle: "Category:Italian_male_tennis_players",
-            cmlimit: "500",
-            format: "json",
-            cmprop: "pageid|title|type|sortkeyprefix",
-        };
+        try {
+            /**
+             * @see https://www.mediawiki.org/wiki/API:Categorymembers
+             */
+            const queryOptions: QueryOptions = {
+                action: "query",
+                list: "categorymembers",
+                cmtitle: "Category:Italian_male_tennis_players",
+                cmlimit: "500",
+                format: "json",
+                cmprop: "pageid|title|type|sortkeyprefix",
+            };
 
-        // getting first results, male players
-        const response = await this.connector.get(`/w/api.php`, queryOptions, true);
+            // getting first results, male players
+            const response: WikiApiResponse<Player> = await this.connector.get(`/w/api.php`, queryOptions, true);
 
-        // getting second results, female players
-        const secondResponse = await this.connector.get(`/w/api.php`, {
-            ...queryOptions,
-            cmtitle: "Category:Italian_female_tennis_players",
-        }, true);
+            // getting second results, female players
+            const secondResponse: WikiApiResponse<Player> = await this.connector.get(`/w/api.php`, {
+                ...queryOptions,
+                cmtitle: "Category:Italian_female_tennis_players",
+            }, true);
 
-        // merging results...
-        const mergedResponse = [...(response as any).query.categorymembers, ...(secondResponse as any).query.categorymembers];
+            // merging results...
+            const malePlayers = response.query?.categorymembers || [];
+            const femalePlayers = secondResponse.query?.categorymembers || [];
+            const mergedResponse = [...malePlayers, ...femalePlayers];
 
-        // wiki does return sorted results, but we're sorting again because at this point
-        // we have results from two different categories, we use sortkeyprefix
-        const sortedResponse = mergedResponse.sort((a: Player, b: Player) => a.sortkeyprefix.localeCompare(b.sortkeyprefix));
+            // wiki does return sorted results, but we're sorting again because at this point
+            // we have results from two different categories, we use sortkeyprefix
+            const sortedResponse = mergedResponse.sort((a: Player, b: Player) => a.sortkeyprefix.localeCompare(b.sortkeyprefix));
 
-        // finally, we filter out subcategories items
-        const filteredResponse = sortedResponse.filter((item: Player) => item.type === 'page');
+            // finally, we filter out subcategories items
+            const filteredResponse = sortedResponse.filter((item: Player) => item.type === 'page');
 
-        return filteredResponse;
+            return filteredResponse;
+        } catch (error) {
+            console.error(error);
+            throw new Error('Failed to fetch players from Wikipedia API');
+        }
+
 
     }
 
